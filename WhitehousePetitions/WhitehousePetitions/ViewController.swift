@@ -9,31 +9,15 @@ import UIKit
 
 class ViewController: UITableViewController {
     var petitions = [Petition]()
+    var topPetitions = [Petition]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url: String
-        
-        if navigationController?.tabBarItem.tag == 0 {
-           url = "https://www.hackingwithswift.com/samples/petitions-1.json"
-        } else {
-            url = "https://www.hackingwithswift.com/samples/petitions-2.json"
-        }
-        
-        guard let url = URL(string: url) else {
-            showError()
-            return
-        }
-        
-        if let data = try? Data(contentsOf: url) {
-            parse(json: data)
-            return
-        }
-        
-        showError()
+        fetchPetitions()
     }
     
+    /// Shows a connection problem error.
     func showError() {
         let ac = UIAlertController(
             title: "Loading error",
@@ -45,6 +29,7 @@ class ViewController: UITableViewController {
         present(ac, animated: true)
     }
     
+    /// Parses the given data into Petitions.
     func parse(json: Data) {
         let decoder = JSONDecoder()
         
@@ -52,6 +37,52 @@ class ViewController: UITableViewController {
             petitions = jsonPetitions.results
             tableView.reloadData()
         }
+    }
+    
+    /// Fetches the petitions by making a API request if the petitions are empty.
+    /// Otherwise the cached petitions will be used, without making a new request.
+    private func fetchPetitions() {
+        let tag = navigationController?.tabBarItem.tag
+        let url = getUrlByTag(tabBarItemTag: tag)
+        
+        if !shouldMakeApiRequest(tabBarItemTag: tag) {
+           return
+        }
+        
+        guard let url = URL(string: url) else {
+            showError()
+            return
+        }
+        
+        if let data = try? Data(contentsOf: url) {
+            print("making request")
+            parse(json: data)
+            return
+        }
+        
+        showError()
+    }
+    
+    /// Returns the URL of the  JSON  for the petitions
+    private func getUrlByTag(tabBarItemTag tag: Int?) -> String {
+        if tag == 0 {
+           return "https://www.hackingwithswift.com/samples/petitions-1.json"
+        }
+        
+        return "https://www.hackingwithswift.com/samples/petitions-2.json"
+    }
+    
+    /// Checks whether a new request should be made to fetch the petitions or not
+    private func shouldMakeApiRequest(tabBarItemTag tag: Int?) -> Bool {
+        if tag == 0 && petitions.count > 0 {
+            return false
+        }
+        
+        if tag == 1 && topPetitions.count > 0 {
+            return false
+        }
+        
+        return true
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
