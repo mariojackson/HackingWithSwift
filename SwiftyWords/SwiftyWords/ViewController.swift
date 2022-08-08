@@ -99,5 +99,28 @@ class ViewController: UIViewController {
             buttonsView.topAnchor.constraint(equalTo: submit.bottomAnchor, constant: 20),
             buttonsView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, constant: -20)
         ])
+        
+        let buttonWidth = 150
+        let buttonHeight = 80
+        
+        for row in 0..<4 {
+            for col in 0..<5 {
+                let letterButton = UIButton(type: .system)
+                letterButton.titleLabel?.font = UIFont.systemFont(ofSize: 36)
+                letterButton.setTitle("WWW", for: .normal)
+                
+                let frame = CGRect(
+                    x: col * buttonWidth, // x position in column e.g. 0, 150, 300 and so on, since the button width is 150
+                    y: row * buttonHeight, // y position in row e.g. 0, 80, 160 and so on, since the button height is 80
+                    width: buttonWidth,
+                    height: buttonHeight
+                )
+                
+                letterButton.frame = frame
+                
+                buttonsView.addSubview(letterButton)
+                letterButtons.append(letterButton)
+            }
+        }
     }
 }
