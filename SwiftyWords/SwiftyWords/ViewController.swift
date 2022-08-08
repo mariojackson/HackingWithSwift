@@ -34,8 +34,8 @@ class ViewController: UIViewController {
         cluesLabel.font = UIFont.systemFont(ofSize: 24)
         cluesLabel.text = "CLUES"
         cluesLabel.numberOfLines = 0
-        view.addSubview(cluesLabel)
         cluesLabel.setContentHuggingPriority(UILayoutPriority(1), for: .vertical)
+        view.addSubview(cluesLabel)
         
         answersLabel = UILabel()
         answersLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -43,8 +43,8 @@ class ViewController: UIViewController {
         answersLabel.text = "ANSWERS"
         answersLabel.numberOfLines = 0
         answersLabel.textAlignment = .right
-        view.addSubview(answersLabel)
         answersLabel.setContentHuggingPriority(UILayoutPriority(1), for: .vertical)
+        view.addSubview(answersLabel)
         
         currentAnswer = UITextField()
         currentAnswer.translatesAutoresizingMaskIntoConstraints = false
