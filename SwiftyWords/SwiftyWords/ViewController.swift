@@ -16,7 +16,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        loadLevel()
     }
     
     override func loadView() {
@@ -58,11 +58,13 @@ class ViewController: UIViewController {
         submit.translatesAutoresizingMaskIntoConstraints = false
         submit.setTitle("SUBMIT", for: .normal)
         view.addSubview(submit)
+        submit.addTarget(self, action: #selector(submitTapped), for: .touchUpInside)
         
         let clear = UIButton(type: .system)
         clear.translatesAutoresizingMaskIntoConstraints = false
         clear.setTitle("CLEAR", for: .normal)
         view.addSubview(clear)
+        clear.addTarget(self, action: #selector(clearTapped), for: .touchUpInside)
         
         let buttonsView = UIView()
         buttonsView.translatesAutoresizingMaskIntoConstraints = false
@@ -120,6 +122,70 @@ class ViewController: UIViewController {
                 
                 buttonsView.addSubview(letterButton)
                 letterButtons.append(letterButton)
+                letterButton.addTarget(self, action: #selector(letterTapped), for: .touchUpInside)
+            }
+        }
+    }
+        
+    var activatedButton = [UIButton]()
+    var solutions = [String]()
+    
+    var score = 1
+    var level = 1
+    
+    @objc func letterTapped(_ sender: UIButton) {
+        
+    }
+    
+    @objc func submitTapped(_ sender: UIButton) {
+        
+    }
+    
+    @objc func clearTapped(_ sender: UIButton) {
+        
+    }
+    
+    func loadLevel() {
+        var clueString = ""
+        var solutionString = ""
+        var letterBits = [String]()
+        
+        guard let levelFileURL = Bundle.main.url(forResource: "level\(level)", withExtension: "txt") else {
+           return
+        }
+        
+        guard let levelContents = try? String(contentsOf: levelFileURL) else {
+            return
+        }
+        
+        var lines = levelContents.components(separatedBy: "\n")
+        lines.shuffle()
+        
+        for (index, line) in lines.enumerated() {
+            let parts = line.components(separatedBy: ": ")
+            print(parts)
+            let answer = parts[0]
+            let clue = parts[1]
+            
+            clueString += "\(index + 1). \(clue)\n"
+            
+            let solutionWord = answer.replacingOccurrences(of: "|", with: "")
+            solutionString = "\(solutionWord.count) letters\n"
+            solutions.append(solutionWord)
+            
+            let bits = answer.components(separatedBy: "|")
+            letterBits += bits
+        }
+    
+        cluesLabel.text = clueString.trimmingCharacters(in: .whitespacesAndNewlines)
+        answersLabel.text = solutionString.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        
+        letterBits.shuffle()
+        
+        if letterBits.count == letterButtons.count {
+            for i in 0..<letterButtons.count {
+                letterButtons[i].setTitle(letterBits[i], for: .normal)
             }
         }
     }
