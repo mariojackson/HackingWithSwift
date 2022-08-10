@@ -127,25 +127,60 @@ class ViewController: UIViewController {
         }
     }
         
-    var activatedButton = [UIButton]()
+    var activatedButtons = [UIButton]()
     var solutions = [String]()
     
-    var score = 1
+    var score = 0 {
+        didSet {
+            scoreLabel.text = "Score: \(score)"
+        }
+    }
+    
     var level = 1
     
     @objc func letterTapped(_ sender: UIButton) {
-        
+        guard let buttonTitle = sender.titleLabel?.text else { return }
+        currentAnswer.text = currentAnswer.text?.appending(buttonTitle)
+        activatedButtons.append(sender)
+        sender.isHidden = true
     }
     
     @objc func submitTapped(_ sender: UIButton) {
+        guard let answerText = currentAnswer.text else { return }
+        guard let solutionPosition = solutions.firstIndex(of: answerText) else { return }
         
+        activatedButtons.removeAll()
+        
+        var splitAnswers = answersLabel.text?.components(separatedBy: "\n")
+        splitAnswers?[solutionPosition] = answerText
+        answersLabel.text = splitAnswers?.joined(separator: "\n")
+        
+        currentAnswer.text = ""
+        score += 1
+        
+        if wordFound() {
+            let ac = UIAlertController(
+                title: "Well done!",
+                message: "You are ready for the next level",
+                preferredStyle: .alert
+            )
+            
+            ac.addAction(UIAlertAction(title: "Let's go!", style: .default, handler: levelUp))
+            present(ac, animated: true)
+        }
     }
     
     @objc func clearTapped(_ sender: UIButton) {
+        currentAnswer.text = ""
         
+        for button in activatedButtons {
+            button.isHidden = false
+        }
+        
+        activatedButtons.removeAll()
     }
     
-    func loadLevel() {
+    private func loadLevel() {
         var clueString = ""
         var solutionString = ""
         var letterBits = [String]()
@@ -163,14 +198,13 @@ class ViewController: UIViewController {
         
         for (index, line) in lines.enumerated() {
             let parts = line.components(separatedBy: ": ")
-            print(parts)
             let answer = parts[0]
             let clue = parts[1]
             
             clueString += "\(index + 1). \(clue)\n"
             
             let solutionWord = answer.replacingOccurrences(of: "|", with: "")
-            solutionString = "\(solutionWord.count) letters\n"
+            solutionString += "\(solutionWord.count) letters\n"
             solutions.append(solutionWord)
             
             let bits = answer.components(separatedBy: "|")
@@ -180,13 +214,27 @@ class ViewController: UIViewController {
         cluesLabel.text = clueString.trimmingCharacters(in: .whitespacesAndNewlines)
         answersLabel.text = solutionString.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        
         letterBits.shuffle()
         
         if letterBits.count == letterButtons.count {
             for i in 0..<letterButtons.count {
                 letterButtons[i].setTitle(letterBits[i], for: .normal)
             }
+        }
+    }
+    
+    private func wordFound() -> Bool {
+       return score % 7 == 0
+    }
+    
+    private func levelUp(action: UIAlertAction) -> Void {
+        level += 1
+        solutions.removeAll(keepingCapacity: true)
+        
+        loadLevel()
+        
+        for button in letterButtons {
+            button.isHidden = false
         }
     }
 }
