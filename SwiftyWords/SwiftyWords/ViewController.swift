@@ -147,7 +147,11 @@ class ViewController: UIViewController {
     
     @objc func submitTapped(_ sender: UIButton) {
         guard let answerText = currentAnswer.text else { return }
-        guard let solutionPosition = solutions.firstIndex(of: answerText) else { return }
+        
+        guard let solutionPosition = solutions.firstIndex(of: answerText) else {
+            handleWrongAnswer()
+            return
+        }
         
         activatedButtons.removeAll()
         
@@ -236,5 +240,19 @@ class ViewController: UIViewController {
         for button in letterButtons {
             button.isHidden = false
         }
+    }
+    
+    private func handleWrongAnswer() {
+        if score > 0 {
+            score -= 1
+        }
+        
+        let ac = UIAlertController(
+            title: "Nope!",
+            message: "That's not a word we are searching for",
+            preferredStyle: .alert
+        )
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        present(ac, animated: true)
     }
 }
