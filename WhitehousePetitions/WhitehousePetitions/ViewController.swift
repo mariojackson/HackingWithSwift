@@ -19,14 +19,16 @@ class ViewController: UITableViewController {
     
     /// Shows a connection problem error.
     func showError() {
-        let ac = UIAlertController(
-            title: "Loading error",
-            message: "There was an problem loading the feed. Please check your connection and try again",
-            preferredStyle: .alert
-        )
-        
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
+        DispatchQueue.main.async {
+            let ac = UIAlertController(
+                title: "Loading error",
+                message: "There was an problem loading the feed. Please check your connection and try again",
+                preferredStyle: .alert
+            )
+            
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(ac, animated: true)
+        }
     }
     
     /// Parses the given data into Petitions.
@@ -35,7 +37,10 @@ class ViewController: UITableViewController {
         
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
             petitions = jsonPetitions.results
-            tableView.reloadData()
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
     
@@ -49,18 +54,19 @@ class ViewController: UITableViewController {
            return
         }
         
-        guard let url = URL(string: url) else {
-            showError()
-            return
-        }
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let url = URL(string: url) else {
+                self.showError()
+                return
+            }
         
-        if let data = try? Data(contentsOf: url) {
-            print("making request")
-            parse(json: data)
-            return
-        }
+            if let data = try? Data(contentsOf: url) {
+                self.parse(json: data)
+                return
+            }
         
-        showError()
+            self.showError()
+        }
     }
     
     /// Returns the URL of the  JSON  for the petitions
