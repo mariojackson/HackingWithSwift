@@ -8,6 +8,7 @@
 import UIKit
 
 class ViewController: UICollectionViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    var people = [Person]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,14 +21,43 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return people.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Person", for: indexPath) as? PersonCell else {
             fatalError("Unable to dequeue a Person cell.")
         }
+        
+        let person = people[indexPath.item]
+        cell.name.text = person.name
+        
+        let imagePath = getDocumentsDirectory().appendingPathComponent(person.image)
+        cell.imageView.image = UIImage(contentsOfFile: imagePath.path)
+        
+        cell.imageView.layer.borderColor = UIColor(white: 0, alpha: 0.3).cgColor
+        cell.imageView.layer.borderWidth = 2
+        cell.imageView.layer.cornerRadius = 3
+        cell.layer.cornerRadius = 7
+        
         return cell
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let person = people[indexPath.item]
+        
+        let ac = UIAlertController(title: "Rename person", message: nil, preferredStyle: .alert)
+        
+        ac.addTextField()
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
+            guard let name = ac?.textFields?[0].text else { return }
+            person.name = name
+            
+            self?.collectionView.reloadData()
+        })
+        
+        present(ac, animated: true)
     }
     
     @objc func addNewPerson() {
@@ -46,6 +76,10 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         if let jpegData = image.jpegData(compressionQuality: 0.8) {
             try? jpegData.write(to: imagePath)
         }
+        
+        let person = Person(name: "Unknown", image: imageName)
+        people.append(person)
+        collectionView.reloadData()
         
         dismiss(animated: true)
     }
